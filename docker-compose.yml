@@ -1,0 +1,33 @@
+x-app-common: &app-common
+  image: myapp
+
+services:
+  app1:
+    <<: *app-common
+    build: .
+    container_name: app1
+  app2:
+    <<: *app-common
+    container_name: app2
+  app3:
+    <<: *app-common
+    container_name: app3
+
+  haproxy:
+    image: haproxy:2.9
+    container_name: haproxy
+    ports:
+      - "80:80"
+      - "8404:8404"
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      - app1
+      - app2
+      - app3
+
+  console:
+    build: ./console
+    container_name: console
+    depends_on:
+      - haproxy
